@@ -23,7 +23,9 @@ import { AuthGuardUser } from 'src/auth/auth.guard.user';
 import {
     ApiBadRequestResponse,
     ApiBody,
+    ApiConflictResponse,
     ApiCreatedResponse,
+    ApiNoContentResponse,
     ApiNotFoundResponse,
     ApiOkResponse,
     ApiOperation,
@@ -67,7 +69,9 @@ export class UsersController {
     async findById(@Param('id') id: string) {
         const user = await this.service.findById(id);
         if (!user) {
-            throw new NotFoundException(`No user with the id ${id} was found`);
+            throw new NotFoundException(
+                `No user with the id '${id}' was found`,
+            );
         }
         return user;
     }
@@ -105,10 +109,9 @@ export class UsersController {
         description: 'User created successfully',
         type: ReturnUserDto,
     })
-    @ApiBadRequestResponse({
-        description: 'One of the properties that must be unique is not unique',
+    @ApiConflictResponse({
+        description: 'A property that must be unique already exists',
     })
-    @ApiBody({ type: CreateUserDto })
     @Post()
     async create(@Body() dto: CreateUserDto) {
         try {
@@ -143,7 +146,7 @@ export class UsersController {
             switch (error.code) {
                 case 'P2025':
                     throw new NotFoundException(
-                        `No user with the id ${id} was found`,
+                        `No user with the id '${id}' was found`,
                     );
                 default:
                     this.logger.error(error);
@@ -192,7 +195,6 @@ export class UsersController {
     }
 
     @ApiOperation({ summary: 'Admin only endpoint to update an user by id' })
-    @ApiBody({ type: UpdateUserDto })
     @ApiOkResponse({
         description: 'Successfully updated the user',
         type: ReturnUserDto,
@@ -209,7 +211,7 @@ export class UsersController {
             switch (error.code) {
                 case 'P2025':
                     throw new NotFoundException(
-                        `No user with the id ${id} was found`,
+                        `No user with the id '${id}' was found`,
                     );
                 default:
                     this.logger.error(error);
@@ -233,7 +235,6 @@ export class UsersController {
         description: 'Unique constraint failed for one of the fields',
     })
     @ApiUnauthorizedResponse()
-    @ApiBody({ type: UpdateUserDto })
     @UseGuards(AuthGuardUser)
     @Patch('u/:username')
     async updateByUsername(
@@ -298,7 +299,7 @@ export class UsersController {
         return await this.service.findAllOrdersByUser(username);
     }
 
-    @ApiBody({ type: [OrderProductDto] })
+    @ApiOperation({ summary: 'User only, order products' })
     @ApiCreatedResponse({
         description: 'Products ordered successfully',
         type: Order,
@@ -310,6 +311,7 @@ export class UsersController {
     @ApiNotFoundResponse({
         description: 'User or product with given id do not exist',
     })
+    @ApiBody({ type: [OrderProductDto] })
     @UseGuards(AuthGuardUser)
     @Post('orders')
     async order(@Req() req: Request, @Body() dtos: OrderProductDto[]) {
@@ -320,6 +322,9 @@ export class UsersController {
     }
 
     @UseGuards(AuthGuardUser)
+    @ApiNoContentResponse({
+        description: 'Given order of the user is deleted successfully',
+    })
     @HttpCode(HttpStatus.NO_CONTENT)
     @Delete('u/:username/orders/:order_id')
     async deleteOrder(
@@ -336,7 +341,7 @@ export class UsersController {
             switch (error.code) {
                 case 'P2025':
                     throw new BadRequestException(
-                        `Order with id ${order_id} could not be found`,
+                        `Order with the id '${order_id}' could not be found`,
                     );
                 default:
                     this.logger.error(error);

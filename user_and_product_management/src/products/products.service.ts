@@ -114,7 +114,20 @@ export class ProductsService {
         );
         if (!branch) {
             throw new NotFoundException(
-                `Branch with id ${dto.branch_id} was not found`,
+                `Branch with the id '${dto.branch_id}' was not found`,
+            );
+        }
+        const branchCategory = await this.db.branchCategories.findUnique({
+            where: {
+                category_id_branch_id: {
+                    branch_id: dto.branch_id,
+                    category_id: dto.category_id,
+                },
+            },
+        });
+        if (!branchCategory) {
+            throw new BadRequestException(
+                `Branch with the id '${dto.branch_id}' does not have categroy with the id '${dto.category_id}'`,
             );
         }
         await this.db.product.create({

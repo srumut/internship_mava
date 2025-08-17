@@ -4,14 +4,13 @@ import { CreateAdminDto } from './dto/create-admin.dto';
 import { v4 as uuid4 } from 'uuid';
 import { UpdateAdminDto } from './dto/update-admin.dto';
 import * as bcrypt from 'bcrypt';
-import { Admin } from 'generated/prisma';
 
 @Injectable()
 export class AdminsService {
     constructor(private readonly db: DatabaseService) {}
 
     findAll() {
-        return this.db.admin.findMany({ select: { id: true, username: true } });
+        return this.db.admin.findMany({ omit: { password: true } });
     }
 
     findById(id: string) {

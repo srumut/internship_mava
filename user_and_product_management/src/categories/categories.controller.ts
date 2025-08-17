@@ -57,7 +57,7 @@ export class CategoriesController {
         const category = await this.service.findById(id);
         if (!category) {
             throw new NotFoundException(
-                `Category with the id ${id} was not found`,
+                `Category with the id '${id}' was not found`,
             );
         }
         return category;
@@ -104,7 +104,7 @@ export class CategoriesController {
             switch (error.code) {
                 case 'P2025':
                     throw new NotFoundException(
-                        `No product with the id ${id} was found`,
+                        `No product with the id '${id}' was found`,
                     );
                 default:
                     this.logger.error(error);
@@ -135,7 +135,7 @@ export class CategoriesController {
                     );
                 case 'P2025':
                     throw new NotFoundException(
-                        `No category with the id ${id} was found`,
+                        `No category with the id '${id}' was found`,
                     );
                 default:
                     this.logger.error(error);

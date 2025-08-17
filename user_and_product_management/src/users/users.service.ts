@@ -319,7 +319,7 @@ export class UsersService {
         // if the token subject user does exists or not
         if (!(await this.findById(user_id))) {
             throw new NotFoundException(
-                `User with id ${user_id} was not found`,
+                `User with the id '${user_id}' was not found`,
             );
         }
         for (let dto of dtos) {
@@ -328,11 +328,11 @@ export class UsersService {
             });
             if (!product) {
                 throw new NotFoundException(
-                    `No product with the id ${dto.product_id} was found`,
+                    `No product with the id '${dto.product_id}' was found`,
                 );
             } else if (product.stock < dto.count) {
                 throw new BadRequestException(
-                    `Product with id ${dto.product_id} has not enough stock`,
+                    `Product with the id '${dto.product_id}' has not enough stock`,
                 );
             }
         }

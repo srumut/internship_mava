@@ -16,13 +16,13 @@ import { CreateAdminDto } from './dto/create-admin.dto';
 import { UpdateAdminDto } from './dto/update-admin.dto';
 import { AuthGuardAdmin } from 'src/auth/auth.guard.admin';
 import {
-    ApiBadRequestResponse,
-    ApiBody,
+    ApiConflictResponse,
     ApiCreatedResponse,
     ApiNotFoundResponse,
     ApiOkResponse,
     ApiOperation,
 } from '@nestjs/swagger';
+import { ReturnAdminDto } from './dto/admin.dto';
 
 @Controller('admins')
 export class AdminsController {
@@ -35,6 +35,7 @@ export class AdminsController {
     @ApiOperation({ summary: 'Admin only, retrieve all admins' })
     @ApiOkResponse({
         description: 'Successfully retrieved all the admins',
+        type: [ReturnAdminDto],
     })
     @UseGuards(AuthGuardAdmin)
     @Get()
@@ -45,6 +46,7 @@ export class AdminsController {
     @ApiOperation({ summary: 'Admin only, retrieve the admin by id' })
     @ApiOkResponse({
         description: 'Successfully retrieved the admin',
+        type: ReturnAdminDto,
     })
     @ApiNotFoundResponse({
         description: 'Admin with the given id does not exist',
@@ -54,7 +56,9 @@ export class AdminsController {
     async findById(@Param('id') id: string) {
         const admin = await this.service.findById(id);
         if (!admin) {
-            throw new NotFoundException(`No admin with the id ${id} was found`);
+            throw new NotFoundException(
+                `No admin with the id '${id}' was found`,
+            );
         }
         return admin;
     }
@@ -62,11 +66,11 @@ export class AdminsController {
     @ApiOperation({ summary: 'Admin only, create an admin' })
     @ApiCreatedResponse({
         description: 'Admin created successfully',
+        type: ReturnAdminDto,
     })
-    @ApiBadRequestResponse({
-        description: 'One of the properties that must be unique is not unique',
+    @ApiConflictResponse({
+        description: 'A property that must be unique already exists',
     })
-    @ApiBody({ type: CreateAdminDto })
     @UseGuards(AuthGuardAdmin)
     @Post()
     async create(@Body() dto: CreateAdminDto) {
@@ -88,6 +92,7 @@ export class AdminsController {
     @ApiOperation({ summary: 'Admin only, delete an admin by id' })
     @ApiOkResponse({
         description: 'Successfully deleted the admin',
+        type: ReturnAdminDto,
     })
     @ApiNotFoundResponse({
         description: 'Admin with the given id does not exist',
@@ -101,7 +106,7 @@ export class AdminsController {
             switch (error.code) {
                 case 'P2025':
                     throw new NotFoundException(
-                        `No admin with the id ${id} was found`,
+                        `No admin with the id '${id}' was found`,
                     );
                 default:
                     this.logger.error(error);
@@ -113,11 +118,11 @@ export class AdminsController {
     @ApiOperation({ summary: 'Admin only, update an admin' })
     @ApiOkResponse({
         description: 'Successfully updated the admin',
+        type: ReturnAdminDto,
     })
     @ApiNotFoundResponse({
         description: 'Admin with the given id does not exist',
     })
-    @ApiBody({ type: UpdateAdminDto })
     @UseGuards(AuthGuardAdmin)
     @Patch(':id')
     async update(@Param('id') id: string, @Body() dto: UpdateAdminDto) {
@@ -131,7 +136,7 @@ export class AdminsController {
                     );
                 case 'P2025':
                     throw new NotFoundException(
-                        `No admin with the id ${id} was found`,
+                        `No admin with the id '${id}' was found`,
                     );
                 default:
                     this.logger.error(error);

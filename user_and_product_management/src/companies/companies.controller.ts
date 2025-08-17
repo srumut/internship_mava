@@ -9,6 +9,7 @@ import {
     Post,
     UseGuards,
     Logger,
+    BadRequestException,
 } from '@nestjs/common';
 import { AuthGuardAdmin } from 'src/auth/auth.guard.admin';
 import {
@@ -68,7 +69,9 @@ export class CompaniesController {
     async findById(@Param('id') id: string) {
         const company = await this.service.findById(id);
         if (!company) {
-            throw new NotFoundException(`Company with id ${id} was not found`);
+            throw new NotFoundException(
+                `Company with the id '${id}' was not found`,
+            );
         }
         return company;
     }
@@ -106,7 +109,7 @@ export class CompaniesController {
             switch (error.code) {
                 case 'P2025':
                     throw new NotFoundException(
-                        `No company with id ${id} was found`,
+                        `No company with the id '${id}' was found`,
                     );
                 default:
                     this.logger.error(error);
@@ -132,7 +135,7 @@ export class CompaniesController {
             switch (error.code) {
                 case 'P2025':
                     throw new NotFoundException(
-                        `No company with id ${id} was found`,
+                        `No company with the id '${id}' was found`,
                     );
                 default:
                     this.logger.error(error);
@@ -183,5 +186,72 @@ export class CompaniesController {
     @Patch('branches/:id')
     async updateBranch(@Param('id') id: string, @Body() dto: UpdateBranchDto) {
         return await this.service.updateBranch(id, dto);
+    }
+
+    @ApiOperation({
+        summary: 'Retrieve all categories available on the given branch',
+    })
+    @ApiOkResponse({
+        description:
+            'Successfully retrieved all the categories given branch has',
+    })
+    @UseGuards(AuthGuardUser)
+    @Get('branches/:id/categories')
+    async findAllCategoriesForTheGivenBranch(@Param('id') id: string) {
+        return await this.service.findCategoriesForTheGivenBranch(id);
+    }
+
+    @ApiOperation({ summary: 'Admin only, add a category to the branch' })
+    @ApiCreatedResponse({
+        description: 'Given category successfully added to the given branch',
+    })
+    @UseGuards(AuthGuardAdmin)
+    @Post('branches/{:branch_id}/categories/{:category_id}')
+    async addGivenCategoryToTheGivenBranch(
+        @Param('branch_id') branch_id: string,
+        @Param('category_id') category_id: string,
+    ) {
+        try {
+            return await this.service.addGivenCategoryToTheGivenBranch(
+                branch_id,
+                category_id,
+            );
+        } catch (error) {
+            switch (error?.code) {
+                case 'P2002':
+                    throw new BadRequestException(
+                        `Branch with the id '${branch_id}' already has the category with the id '${category_id}'`,
+                    );
+            }
+            this.logger.error(error);
+            throw error;
+        }
+    }
+
+    @ApiOperation({ summary: 'Admin only, remove a category from the branch' })
+    @ApiOkResponse({
+        description: 'Given category successfully removed from given branch',
+    })
+    @UseGuards(AuthGuardAdmin)
+    @Delete('branches/{:branch_id}/categories/{:category_id}')
+    async removeGivenCategoryFromTheGivenBranch(
+        @Param('branch_id') branch_id: string,
+        @Param('category_id') category_id: string,
+    ) {
+        try {
+            return await this.service.removeGivenCategoryFromTheGivenBranch(
+                branch_id,
+                category_id,
+            );
+        } catch (error) {
+            switch (error?.code) {
+                case 'P2025':
+                    throw new BadRequestException(
+                        `Invalid branch_id or category_id`,
+                    );
+            }
+            this.logger.error(error);
+            throw error;
+        }
     }
 }

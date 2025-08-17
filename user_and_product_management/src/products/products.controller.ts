@@ -11,8 +11,6 @@ import {
     UseGuards,
     Logger,
     Req,
-    Query,
-    ParseIntPipe,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -20,6 +18,7 @@ import { AuthGuardUser } from 'src/auth/auth.guard.user';
 import { AuthGuardAdmin } from 'src/auth/auth.guard.admin';
 import {
     ApiBadRequestResponse,
+    ApiConflictResponse,
     ApiCreatedResponse,
     ApiNotFoundResponse,
     ApiOkResponse,
@@ -43,7 +42,6 @@ export class ProductsController {
         type: [ProductRespDto],
     })
     @UseGuards(AuthGuardUser)
-    @ApiQuery({ name: 'deneme', required: false, type: 'string' })
     @ApiQuery({ name: 'branch_id', required: false, type: 'string' })
     @ApiQuery({ name: 'company_id', required: false, type: 'string' })
     @ApiQuery({ name: 'category_id', required: false, type: 'string' })
@@ -68,7 +66,7 @@ export class ProductsController {
         const product = await this.service.findById(id);
         if (!product) {
             throw new NotFoundException(
-                `No product with the id ${id} was found`,
+                `No product with the id '${id}' was found`,
             );
         }
         return product;
@@ -79,8 +77,11 @@ export class ProductsController {
         description: 'Successfully created the product',
         type: ProductRespDto,
     })
+    @ApiConflictResponse({
+        description: 'One or more properties that must be unique already exist',
+    })
     @ApiBadRequestResponse({
-        description: 'Properties thus must be unique are not unique',
+        description: 'Given branch does not have the given category',
     })
     @ApiNotFoundResponse({
         description: 'Company with the given id does not exists',
@@ -101,7 +102,7 @@ export class ProductsController {
                 // service, so P2003 can only mean bad company_id
                 case 'P2003':
                     throw new NotFoundException(
-                        `Category with the id ${dto.category_id} was not found`,
+                        `Category with the id '${dto.category_id}' was not found`,
                     );
                 default:
                     this.logger.error(error);
@@ -129,7 +130,7 @@ export class ProductsController {
             switch (error.code) {
                 case 'P2025':
                     throw new NotFoundException(
-                        `No product with the id ${id} was found`,
+                        `No product with the id '${id}' was found`,
                     );
                 default:
                     this.logger.error(error);
@@ -161,7 +162,7 @@ export class ProductsController {
                     );
                 case 'P2025':
                     throw new NotFoundException(
-                        `No product with the id ${id} was found`,
+                        `No product with the id '${id}' was found`,
                     );
                 default:
                     this.logger.error(error);

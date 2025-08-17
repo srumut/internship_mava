@@ -57,4 +57,31 @@ export class CompaniesService {
     updateBranch(id: string, dto: UpdateBranchDto) {
         return this.db.branch.update({ where: { id }, data: { ...dto } });
     }
+
+    findCategoriesForTheGivenBranch(id: string) {
+        return this.db.$queryRaw`
+            SELECT
+                ct.id AS id,
+                ct.name AS name,
+                ct.description AS description
+            FROM branch b
+            INNER JOIN branch_categories bct ON bct.branch_id = b.id
+            INNER JOIN category ct ON ct.id = bct.category_id
+            WHERE b.id = ${id}`;
+    }
+
+    addGivenCategoryToTheGivenBranch(branch_id: string, category_id: string) {
+        return this.db.branchCategories.create({
+            data: { branch_id, category_id },
+        });
+    }
+
+    removeGivenCategoryFromTheGivenBranch(
+        branch_id: string,
+        category_id: string,
+    ) {
+        return this.db.branchCategories.delete({
+            where: { category_id_branch_id: { branch_id, category_id } },
+        });
+    }
 }

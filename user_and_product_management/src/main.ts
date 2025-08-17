@@ -27,6 +27,7 @@ async function bootstrap() {
         swaggerOptions: {
             defaultModelExpandDepth: 7,
             defaultModelsExpandDepth: 7,
+            persistAuthorization: true,
         },
     });
 
