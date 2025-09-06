@@ -40,6 +40,9 @@ export class Order {
     @ApiProperty({ example: 'c337febb-155f-4740-ba93-b5a2bbc25cd6' })
     order_id: string;
 
+    @ApiProperty()
+    time: Date;
+
     @ApiProperty({ type: [Product] })
     products: Product[];
 }

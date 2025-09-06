@@ -70,9 +70,16 @@ export class CompaniesService {
             WHERE b.id = ${id}`;
     }
 
-    addGivenCategoryToTheGivenBranch(branch_id: string, category_id: string) {
-        return this.db.branchCategories.create({
+    async addGivenCategoryToTheGivenBranch(
+        branch_id: string,
+        category_id: string,
+    ) {
+        await this.db.branchCategories.create({
             data: { branch_id, category_id },
+        });
+
+        return this.db.category.findUnique({
+            where: { id: category_id },
         });
     }
 

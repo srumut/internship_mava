@@ -63,7 +63,7 @@ export class ProductsController {
     @UseGuards(AuthGuardUser)
     @Get(':id')
     async findById(@Param('id') id: string) {
-        const product = await this.service.findById(id);
+        const product = (await this.service.findById(id))[0];
         if (!product) {
             throw new NotFoundException(
                 `No product with the id '${id}' was found`,
@@ -90,7 +90,8 @@ export class ProductsController {
     @Post()
     async create(@Body() dto: CreateProductDto) {
         try {
-            return await this.service.create(dto);
+            const product: {}[] = await this.service.create(dto);
+            return product[0];
         } catch (error) {
             if (error instanceof NotFoundException) throw error;
             switch (error.code) {
@@ -159,6 +160,11 @@ export class ProductsController {
                 case 'P2002':
                     throw new BadRequestException(
                         `Unique contraint failed for ${error.meta.target}`,
+                    );
+                case 'P2003':
+                    console.error(error);
+                    throw new BadRequestException(
+                        `Values for the ${error.meta.target} don't exist`,
                     );
                 case 'P2025':
                     throw new NotFoundException(

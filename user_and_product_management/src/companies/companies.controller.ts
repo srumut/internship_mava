@@ -111,6 +111,10 @@ export class CompaniesController {
                     throw new NotFoundException(
                         `No company with the id '${id}' was found`,
                     );
+                case 'P2003':
+                    throw new BadRequestException(
+                        `This company can not be deleted because there are branches associated with it`,
+                    );
                 default:
                     this.logger.error(error);
                     throw error;
@@ -163,7 +167,16 @@ export class CompaniesController {
     @UseGuards(AuthGuardAdmin)
     @Post('branches')
     async createBranch(@Body() dto: CreateBranchDto) {
-        return await this.service.createBranch(dto);
+        try {
+            return await this.service.createBranch(dto);
+        } catch (error) {
+            switch (error?.code) {
+                case 'P2003':
+                    throw new NotFoundException(
+                        `No company with the id ${dto.company_id} was found`,
+                    );
+            }
+        }
     }
 
     @ApiOperation({ summary: 'Admin only, delete a branch by id' })
@@ -221,6 +234,10 @@ export class CompaniesController {
                 case 'P2002':
                     throw new BadRequestException(
                         `Branch with the id '${branch_id}' already has the category with the id '${category_id}'`,
+                    );
+                case 'P2003':
+                    throw new NotFoundException(
+                        `No category with the id ${category_id} was found`,
                     );
             }
             this.logger.error(error);

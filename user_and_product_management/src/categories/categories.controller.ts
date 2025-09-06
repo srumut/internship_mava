@@ -104,7 +104,11 @@ export class CategoriesController {
             switch (error.code) {
                 case 'P2025':
                     throw new NotFoundException(
-                        `No product with the id '${id}' was found`,
+                        `No category with the id '${id}' was found`,
+                    );
+                case 'P2003':
+                    throw new BadRequestException(
+                        'There are products in this category',
                     );
                 default:
                     this.logger.error(error);

@@ -109,7 +109,7 @@ export class UsersController {
         description: 'User created successfully',
         type: ReturnUserDto,
     })
-    @ApiConflictResponse({
+    @ApiBadRequestResponse({
         description: 'A property that must be unique already exists',
     })
     @Post()
@@ -212,6 +212,10 @@ export class UsersController {
                 case 'P2025':
                     throw new NotFoundException(
                         `No user with the id '${id}' was found`,
+                    );
+                case 'P2002':
+                    throw new BadRequestException(
+                        `${error.meta.target} must be unique`,
                     );
                 default:
                     this.logger.error(error);
@@ -325,7 +329,6 @@ export class UsersController {
     @ApiNoContentResponse({
         description: 'Given order of the user is deleted successfully',
     })
-    @HttpCode(HttpStatus.NO_CONTENT)
     @Delete('u/:username/orders/:order_id')
     async deleteOrder(
         @Param('username') username: string,

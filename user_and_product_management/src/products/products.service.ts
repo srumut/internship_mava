@@ -88,8 +88,8 @@ export class ProductsService {
             ${query_string};`);
     }
 
-    findById(id: string) {
-        return this.db.$queryRaw`
+    async findById(id: string): Promise<{}[]> {
+        return await this.db.$queryRaw`
             SELECT
                 p.id AS id,
                 p.name AS name,
@@ -108,7 +108,7 @@ export class ProductsService {
             WHERE p.id = ${id};`;
     }
 
-    async create(dto: CreateProductDto) {
+    async create(dto: CreateProductDto): Promise<{}[]> {
         const branch = await this.companiesService.findBranchById(
             dto.branch_id,
         );
@@ -166,6 +166,7 @@ export class ProductsService {
             where: { id: id },
             data: { ...dto },
         });
+        console.log(product);
         const extra_info: {}[] = await this.db.$queryRaw`
             SELECT
                 ct.name AS category,

@@ -13,4 +13,7 @@ export class BranchDto {
 
     @ApiProperty()
     updatedAt: Date;
+
+    @ApiProperty()
+    company_id: string;
 }

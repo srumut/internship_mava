@@ -153,6 +153,7 @@ export class UsersService {
                 // if order is not yet added to users order list
                 user.orders.push({
                     order_id: db_order.order_id,
+                    time: db_order.time,
                     products: [
                         {
                             product_id: db_order.product_id,
@@ -181,6 +182,7 @@ export class UsersService {
                 orders: [
                     {
                         order_id: db_order.order_id,
+                        time: db_order.time,
                         products: [
                             {
                                 product_id: db_order.product_id,
@@ -269,6 +271,7 @@ export class UsersService {
             // if order is not yet added to users order list
             response.push({
                 order_id: order.order_id,
+                time: order.time,
                 products: [
                     {
                         product_id: order.product_id,
